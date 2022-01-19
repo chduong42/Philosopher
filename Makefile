@@ -3,17 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: chduong <chduong@student.42.fr>            +#+  +:+       +#+         #
+#    By: kennyduong <kennyduong@student.42.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/05 18:48:08 by kennyduong        #+#    #+#              #
-#    Updated: 2021/12/27 16:57:42 by chduong          ###   ########.fr        #
+#    Updated: 2022/01/18 00:40:28 by kennyduong       ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 #########################################
 #				PROGRAMS				#
 #########################################
-SL			=	philosopher
+PH			=	philo
 
 #########################################
 #				COMMANDS				#
@@ -36,33 +36,27 @@ PURPLE     =   $'\033[0;35m
 CYAN       =   $'\033[0;96m
 WHITE      =   $'\033[0;37m
 END        =   $'\033[0;m
-BOLD       =   $'\e[1m
+BOLD       =   $'\033[1m
 
 #########################################
 #			FLAGS COMPILATION			#
 #########################################
-CFLAGS		=	-Wall -Wextra -Werror
-DEBUG		=	-fsanitize=address -g3
-
-INC			= 	-I includes $(INC_MLX) $(INC_LFT)
-INC_LFT		=	-I libft/inc
-
-LINK		=	$(LINK_LFT) $(LINK_MLX)
-LINK_LFT	=	-L ./libft -lft
+CFLAGS		=	-Wall -Wextra -Werror -pthread
+DEBUG		=	-fsanitize=thread -g3
+INC			= 	-I includes
+LINK		= 	-pthread
 
 #########################################
 #			DIRECTORIES					#
 #########################################
 SRC_DIR		=	srcs/
-LFT_DIR		=	libft/
 OBJ_DIR		=	obj/
 
 #########################################
 #			SOURCES	FILES				#
 #########################################
-LIBFT		=	$(LFT_DIR)libft.a
-
-PH_SRC		=	
+PH_SRC		=	main.c			create_threads.c		parsing.c\
+				routine.c		utils.c					utils2.c
 
 #########################################
 #            OBJECT FILES    	        #
@@ -73,14 +67,12 @@ PH_OBJ		:=	$(addprefix $(OBJ_DIR), $(PH_OBJ))
 #########################################
 #			MAKE	RULES				#
 #########################################
-$(SL): $(MLX) $(LIBFT) $(OBJ_DIR) $(SL_OBJ)
-	@echo "> $(CYAN)Generate objects$(END) : \t\t[$(GREEN)OK$(END)]"
-	@$(CC) -o $@ $(SL_OBJ) $(LIBFT) $(MLX) $(LINK)
-	@echo "> $(WHITE)$(BOLD)Philosopher Compilation$(END) : \t[$(YELLOW)COMPLETE$(END)]"
+all: $(PH)
 
-$(LIBFT):
-	@make -s -C $(LFT_DIR)
-	@echo "> $(CYAN)Create LIBFT$(END) : \t\t[$(GREEN)OK$(END)]"
+$(PH): $(OBJ_DIR) $(PH_OBJ)
+	@echo "> $(CYAN)Generate objects$(END) : \t\t[$(GREEN)OK$(END)]"
+	@$(CC) $(LINK) -o $@ $(PH_OBJ)
+	@echo "> $(WHITE)$(BOLD)Philosopher Compilation$(END) : \t[$(YELLOW)COMPLETE$(END)]"
 
 ${OBJ_DIR}%.o:	${SRC_DIR}%.c
 # @${MKDIR} ${@D}
@@ -88,20 +80,15 @@ ${OBJ_DIR}%.o:	${SRC_DIR}%.c
 
 $(OBJ_DIR):
 	@$(MKDIR) $(OBJ_DIR)
-	
-all: $(SL)
 
 bonus :	
 	
 clean:
 	@$(RM) $(OBJ_DIR)
-	@make -s -C $(LFT_DIR) clean
 	@echo "> $(PURPLE)Clean objects$(END) : \t\t[$(GREEN)OK$(END)]"
 	
 fclean: clean
-	@make -s -C $(LFT_DIR) fclean
-	@echo "> $(PURPLE)Delete LIBFT$(END) : \t\t[$(GREEN)OK$(END)]"
-	@$(RM) $(SL)
+	@$(RM) $(PH)
 	@echo "> $(PURPLE)Delete Program$(END) : \t\t[$(GREEN)OK$(END)]"
 	
 re: fclean all 
@@ -110,6 +97,6 @@ norm:
 	@norminette ${SRC_DIR} ${INC_DIR} | grep 'Error' ; true
 
 leak:
-	valgrind ./${SL}
+	valgrind ./${PH}
 
 .PHONY: all clean fclean re
